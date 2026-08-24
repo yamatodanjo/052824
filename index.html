@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base Wallet Tracker | Check On-Chain Activity & Balance</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #f4f6fa;
+      --base-blue: #0052ff;
+      --sidebar-width: 260px;
+    }
+
+    body {
+      background-color: var(--bg-light);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem 1rem;
+      z-index: 1000;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: 0.5px;
+      color: var(--base-blue);
+      text-decoration: none;
+      padding: 0.5rem;
+    }
+
+    .nav-link-custom {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 1rem;
+      color: #64748b;
+      font-weight: 500;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      margin-bottom: 0.25rem;
+    }
+
+    .nav-link-custom:hover {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .nav-link-custom.active {
+      background-color: #eef2ff;
+      color: var(--base-blue);
+      font-weight: 600;
+    }
+
+    /* Main Content Wrapper */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2.5rem 3rem;
+    }
+
+    @media (max-width: 991.98px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+    }
+
+    /* Cards Styling */
+    .card-custom {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      height: 100%;
+    }
+
+    .badge-unofficial {
+      background-color: #e0e7ff;
+      color: var(--base-blue);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 0.35rem 0.65rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+
+    .metric-box {
+      background-color: #f8fafc;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+
+    .metric-title {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* Input & Button Adjustments */
+    .form-control-custom, .form-select-custom {
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-base {
+      background-color: var(--base-blue);
+      color: white;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 0.65rem 1.25rem;
+      border: none;
+    }
+
+    .btn-base:hover {
+      background-color: #0043d0;
+      color: white;
+    }
+
+    /* Top User Profile Header */
+    .profile-pill {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 30px;
+      padding: 0.35rem 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <a href="#" class="brand-logo mb-4">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+        BASE
+      </a>
+      <nav class="nav flex-column">
+        <a href="#" class="nav-link-custom active">
+          <i class="bi bi-diamond"></i> Airdrop Estimate
+        </a>
+        <a href="#" class="nav-link-custom">
+          <i class="bi bi-arrow-down-up"></i> BaseScan
+        </a>
+        <a href="#" class="nav-link-custom">
+          <i class="bi bi-code-slash"></i> LayerHub
+        </a>
+        <a href="#" class="nav-link-custom">
+          <i class="bi bi-compass"></i> Base Docs
+        </a>
+      </nav>
+    </div>
+
+    <div>
+      <div class="p-3 bg-light rounded-3 mb-3 border">
+        <span class="fw-bold text-dark d-block mb-1" style="font-size: 0.8rem;">Unofficial tool</span>
+        <span class="text-muted d-block" style="font-size: 0.75rem;">No official BASE token or airdrop allocation has been announced.</span>
+      </div>
+      <div class="text-muted" style="font-size: 0.8rem;">
+        Created by <a href="#" class="text-decoration-none text-dark fw-semibold">@hi_mhel_xd <i class="bi bi-arrow-up-right"></i></a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Top Nav / Info Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <span class="badge badge-unofficial mb-2">UNOFFICIAL • ESTIMATE ONLY</span>
+        <h1 class="fw-bold m-0" style="font-size: 2rem;">Base Airdrop Estimator</h1>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-white border rounded-pill px-3 py-2 bg-white">
+          <i class="bi bi-moon-stars me-1"></i> Dark
+        </button>
+        <div class="profile-pill">
+          <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <div class="lh-1">
+            <span class="d-block fw-bold" style="font-size: 0.85rem;">mheLxD</span>
+            <span class="text-muted" style="font-size: 0.7rem;">@hi_mhel_xd</span>
+          </div>
+          <i class="bi bi-arrow-up-right ms-2 text-muted" style="font-size: 0.75rem;"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search / Address Input Bar -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-8">
+        <div class="card-custom">
+          <label class="form-label text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">PUBLIC BASE ADDRESS</label>
+          <div class="d-flex gap-2">
+            <input type="text" class="form-control form-control-custom" placeholder="Paste 0x wallet address">
+            <button class="btn btn-base text-nowrap">Check estimate</button>
+          </div>
+          <span class="text-muted mt-2 d-block" style="font-size: 0.75rem;">Reads public Base activity only. Never connect a wallet or sign a transaction here.</span>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card-custom d-flex align-items-center gap-3">
+          <div class="text-primary fs-3">
+            <i class="bi bi-info-circle"></i>
+          </div>
+          <span class="text-primary fw-medium" style="font-size: 0.9rem;">Enter an address to generate an estimated allocation.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estimator Engine Section -->
+    <div class="row g-4 mb-4">
+      <!-- Model Settings -->
+      <div class="col-lg-5">
+        <div class="card-custom">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0">Model Settings</h5>
+            <span class="text-muted" style="font-size: 0.8rem;">Hypothetical</span>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-muted fw-medium" style="font-size: 0.8rem;">FDV scenario</label>
+            <select class="form-select form-select-custom">
+              <option selected>$1B FDV</option>
+              <option>$2B FDV</option>
+              <option>$3B FDV</option>
+              <option>$4B FDV</option>
+              <option>$5B FDV</option>
+              <option>$10B FDV</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-muted fw-medium" style="font-size: 0.8rem;">Total token supply assumption</label>
+            <select class="form-select form-select-custom">
+              <option selected>1B Tokens</option>
+              <option>5B Tokens</option>
+              <option>10B Tokens</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-muted fw-medium" style="font-size: 0.8rem;">Airdrop pool assumption</label>
+            <select class="form-select form-select-custom">
+              <option selected>5% of supply</option>
+              <option>10% of Supply</option>
+              <option>15% of Supply</option>
+              <option>20% of Supply</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-muted fw-medium" style="font-size: 0.8rem;">Estimated Eligeble Users</label>
+            <select class="form-select form-select-custom">
+              <option selected>200K Users</option>
+              <option>300K Users</option>
+              <option>400K Users</option>
+              <option>500K Users</option>
+            </select>
+          </div>
+
+          <hr class="text-muted opacity-25">
+
+          <p class="text-muted m-0" style="font-size: 0.75rem;">
+            Recommended baseline: 10B supply, 5% user pool and 500K recipients. Comparable L2 drops are used only to keep this simulation conservative.
+          </p>
+        </div>
+      </div>
+
+      <!-- Your Estimate Results -->
+      <div class="col-lg-7">
+        <div class="card-custom">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0">Your Estimate</h5>
+            <span class="badge bg-light text-muted border px-2 py-1">Waiting</span>
+          </div>
+
+          <!-- Main Projection Display -->
+          <div class="border rounded-4 p-4 text-center my-3 bg-white">
+            <span class="text-muted d-block mb-1" style="font-size: 0.85rem;">You could receive</span>
+            <div class="display-6 fw-bold text-primary mb-1">-- BASE</div>
+            <span class="text-muted" style="font-size: 0.85rem;">Estimated value: -- USDT</span>
+          </div>
+
+          <!-- Sub-Metrics Grid -->
+          <div class="row g-2 mt-2">
+            <div class="col-6 col-md-3">
+              <div class="metric-box">
+                <div class="metric-title">Modeled token price</div>
+                <div class="metric-value">0.40 USDT</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-box">
+                <div class="metric-title">Average share</div>
+                <div class="metric-value">1,000 BASE</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-box">
+                <div class="metric-title">Activity score</div>
+                <div class="metric-value">--</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-box">
+                <div class="metric-title">Model weight</div>
+                <div class="metric-value">--</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Observed Activity Footer Box -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card-custom">
+          <h5 class="fw-bold mb-3">Observed Activity</h5>
+          
+          <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3">
+              <div class="metric-box">
+                <div class="metric-title">Transactions</div>
+                <div class="metric-value">--</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-box">
+                <div class="metric-title">Active days sampled</div>
+                <div class="metric-value">--</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-box">
+                <div class="metric-title">Contracts sampled</div>
+                <div class="metric-value">--</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="metric-box">
+                <div class="metric-title">ETH balance</div>
+                <div class="metric-value">--</div>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-muted m-0" style="font-size: 0.75rem;">
+            Activity is read from the Base public explorer API. Token supply, airdrop pool, recipients and distribution weighting are user-selected assumptions, not official Base information or financial advice.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+</body>
+</html>
